@@ -270,6 +270,14 @@ void sk_path_line_to(sk_path_t* cpath, float x, float y) {
     as_path(cpath)->lineTo(x, y);
 }
 
+//void sk_path_arc_to_1(sk_path_t* cpath, const sk_rect_t* oval, float startAngle, float sweepAngle, bool forceMoveTo) {
+//    as_path(cpath)->arcTo(AsRect(*oval), startAngle, sweepAngle, forceMoveTo);
+//}
+
+void sk_path_arc_to(sk_path_t* cpath, float x1, float y1, float x2, float y2, float radius) {
+    as_path(cpath)->arcTo(x1, y1, x2, y2, radius);
+}
+
 void sk_path_quad_to(sk_path_t* cpath, float x0, float y0, float x1, float y1) {
     as_path(cpath)->quadTo(x0, y0, x1, y1);
 }
@@ -300,6 +308,10 @@ void sk_path_add_oval(sk_path_t* cpath, const sk_rect_t* crect, sk_path_directio
         return;
     }
     as_path(cpath)->addOval(AsRect(*crect), dir);
+}
+
+void sk_path_add_arc(sk_path_t* cpath, const sk_rect_t* oval, float startAngle, float sweepAngle) {
+    as_path(cpath)->addArc(AsRect(*oval), startAngle, sweepAngle);
 }
 
 bool sk_path_get_bounds(const sk_path_t* cpath, sk_rect_t* crect) {
