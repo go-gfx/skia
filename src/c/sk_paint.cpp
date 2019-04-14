@@ -1,4 +1,6 @@
 /*
+ * Copyright 2019 Tapir Liu.
+ *
  * Copyright 2015 Google Inc.
  *
  * Use of this source code is governed by a BSD-style license that can be
@@ -13,35 +15,72 @@
 #include "sk_paint.h"
 #include "sk_types_priv.h"
 
-#define MAKE_FROM_TO_NAME(FROM)     g_ ## FROM ## _map
-
 const struct {
     sk_stroke_cap_t fC;
     SkPaint::Cap    fSK;
-} MAKE_FROM_TO_NAME(sk_stroke_cap_t)[] = {
+} gStrokeCapMap[] = {
     { BUTT_SK_STROKE_CAP,   SkPaint::kButt_Cap   },
     { ROUND_SK_STROKE_CAP,  SkPaint::kRound_Cap  },
     { SQUARE_SK_STROKE_CAP, SkPaint::kSquare_Cap },
 };
 
+static bool from_c_strokecap(sk_stroke_cap_t from, SkPaint::Cap* to) {
+    for (size_t i = 0; i < SK_ARRAY_COUNT(gStrokeCapMap); ++i) {
+        if (gStrokeCapMap[i].fC == from) {
+            if (to) {
+                *to = gStrokeCapMap[i].fSK;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool to_c_strokecap(SkPaint::Cap from, sk_stroke_cap_t* to) {
+    for (size_t i = 0; i < SK_ARRAY_COUNT(gStrokeCapMap); ++i) {
+        if (gStrokeCapMap[i].fSK == from) {
+            if (to) {
+                *to = gStrokeCapMap[i].fC;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 const struct {
     sk_stroke_join_t fC;
     SkPaint::Join    fSK;
-} MAKE_FROM_TO_NAME(sk_stroke_join_t)[] = {
+} gStrokeJoinMap[] = {
     { MITER_SK_STROKE_JOIN, SkPaint::kMiter_Join },
     { ROUND_SK_STROKE_JOIN, SkPaint::kRound_Join },
     { BEVEL_SK_STROKE_JOIN, SkPaint::kBevel_Join },
 };
 
-#define CType           sk_stroke_cap_t
-#define SKType          SkPaint::Cap
-#define CTypeSkTypeMap  MAKE_FROM_TO_NAME(sk_stroke_cap_t)
-#include "sk_c_from_to.h"
+static bool from_c_strokejoin(sk_stroke_join_t from, SkPaint::Join* to) {
+    for (size_t i = 0; i < SK_ARRAY_COUNT(gStrokeJoinMap); ++i) {
+        if (gStrokeJoinMap[i].fC == from) {
+            if (to) {
+                *to = gStrokeJoinMap[i].fSK;
+            }
+            return true;
+        }
+    }
+    return false;
+}
 
-#define CType           sk_stroke_join_t
-#define SKType          SkPaint::Join
-#define CTypeSkTypeMap  MAKE_FROM_TO_NAME(sk_stroke_join_t)
-#include "sk_c_from_to.h"
+static bool to_c_strokejoin(SkPaint::Join from, sk_stroke_join_t* to) {
+    for (size_t i = 0; i < SK_ARRAY_COUNT(gStrokeJoinMap); ++i) {
+        if (gStrokeJoinMap[i].fSK == from) {
+            if (to) {
+                *to = gStrokeJoinMap[i].fC;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -99,7 +138,7 @@ void sk_paint_set_stroke_miter(sk_paint_t* cpaint, float miter) {
 
 sk_stroke_cap_t sk_paint_get_stroke_cap(const sk_paint_t* cpaint) {
     sk_stroke_cap_t ccap;
-    if (find_c(AsPaint(*cpaint).getStrokeCap(), &ccap)) {
+    if (to_c_strokecap(AsPaint(*cpaint).getStrokeCap(), &ccap)) {
         ccap = BUTT_SK_STROKE_CAP;
     }
     return ccap;
@@ -107,7 +146,7 @@ sk_stroke_cap_t sk_paint_get_stroke_cap(const sk_paint_t* cpaint) {
 
 void sk_paint_set_stroke_cap(sk_paint_t* cpaint, sk_stroke_cap_t ccap) {
     SkPaint::Cap skcap;
-    if (find_sk(ccap, &skcap)) {
+    if (from_c_strokecap(ccap, &skcap)) {
         AsPaint(cpaint)->setStrokeCap(skcap);
     } else {
         // unknown ccap
@@ -116,7 +155,7 @@ void sk_paint_set_stroke_cap(sk_paint_t* cpaint, sk_stroke_cap_t ccap) {
 
 sk_stroke_join_t sk_paint_get_stroke_join(const sk_paint_t* cpaint) {
     sk_stroke_join_t cjoin;
-    if (find_c(AsPaint(*cpaint).getStrokeJoin(), &cjoin)) {
+    if (to_c_strokejoin(AsPaint(*cpaint).getStrokeJoin(), &cjoin)) {
         cjoin = MITER_SK_STROKE_JOIN;
     }
     return cjoin;
@@ -124,7 +163,7 @@ sk_stroke_join_t sk_paint_get_stroke_join(const sk_paint_t* cpaint) {
 
 void sk_paint_set_stroke_join(sk_paint_t* cpaint, sk_stroke_join_t cjoin) {
     SkPaint::Join skjoin;
-    if (find_sk(cjoin, &skjoin)) {
+    if (from_c_strokejoin(cjoin, &skjoin)) {
         AsPaint(cpaint)->setStrokeJoin(skjoin);
     } else {
         // unknown cjoin
