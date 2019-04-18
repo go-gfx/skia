@@ -5,17 +5,12 @@
  * found in the LICENSE file.
  */
 
-#include "sk_types_priv.h"
 #include "SkMatrix.h"
-
-static void from_c_matrix(const sk_matrix_t* cmatrix, SkMatrix* matrix) {
-    matrix->setAll(cmatrix->mat[0], cmatrix->mat[1], cmatrix->mat[2],
-                   cmatrix->mat[3], cmatrix->mat[4], cmatrix->mat[5],
-                   cmatrix->mat[6], cmatrix->mat[7], cmatrix->mat[8]);
-}
 
 #include "../../include/effects/SkGradientShader.h"
 #include "sk_shader.h"
+
+#include "sk_types_priv.h"
 
 const struct {
     sk_shader_tilemode_t    fC;
@@ -37,6 +32,14 @@ static bool from_c_tilemode(sk_shader_tilemode_t cMode, SkShader::TileMode* skMo
     }
     return false;
 }
+
+static const SkPoint& to_skpoint(const sk_point_t& p) {
+    return reinterpret_cast<const SkPoint&>(p);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// public APIs
+///////////////////////////////////////////////////////////////////////////////////////////
 
 void sk_shader_ref(sk_shader_t* cshader) {
     SkSafeRef(AsShader(cshader));
@@ -66,10 +69,6 @@ sk_shader_t* sk_shader_new_linear_gradient(const sk_point_t pts[2],
                                                       reinterpret_cast<const SkColor*>(colors),
                                                       colorPos, colorCount,
                                                       mode, 0, &matrix).release();
-}
-
-static const SkPoint& to_skpoint(const sk_point_t& p) {
-    return reinterpret_cast<const SkPoint&>(p);
 }
 
 sk_shader_t* sk_shader_new_radial_gradient(const sk_point_t* ccenter,
@@ -140,47 +139,4 @@ sk_shader_t* sk_shader_new_two_point_conical_gradient(const sk_point_t* start,
                                                         reinterpret_cast<const SkColor*>(colors),
                                                         reinterpret_cast<const SkScalar*>(colorPos),
                                                         colorCount, mode, 0, &matrix).release();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-
-#include "sk_maskfilter.h"
-#include "SkMaskFilter.h"
-
-const struct {
-    sk_blurstyle_t  fC;
-    SkBlurStyle     fSk;
-} gBlurStylePairs[] = {
-    { NORMAL_SK_BLUR_STYLE, kNormal_SkBlurStyle },
-    { SOLID_SK_BLUR_STYLE,  kSolid_SkBlurStyle },
-    { OUTER_SK_BLUR_STYLE,  kOuter_SkBlurStyle },
-    { INNER_SK_BLUR_STYLE,  kInner_SkBlurStyle },
-};
-
-static bool find_blurstyle(sk_blurstyle_t csrc, SkBlurStyle* dst) {
-    for (size_t i = 0; i < SK_ARRAY_COUNT(gBlurStylePairs); ++i) {
-        if (gBlurStylePairs[i].fC == csrc) {
-            if (dst) {
-                *dst = gBlurStylePairs[i].fSk;
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
-void sk_maskfilter_ref(sk_maskfilter_t* cfilter) {
-    SkSafeRef(AsMaskFilter(cfilter));
-}
-
-void sk_maskfilter_unref(sk_maskfilter_t* cfilter) {
-    SkSafeUnref(AsMaskFilter(cfilter));
-}
-
-sk_maskfilter_t* sk_maskfilter_new_blur(sk_blurstyle_t cstyle, float sigma) {
-    SkBlurStyle style;
-    if (!find_blurstyle(cstyle, &style)) {
-        return nullptr;
-    }
-    return ToMaskFilter(SkMaskFilter::MakeBlur(style, sigma).release());
 }

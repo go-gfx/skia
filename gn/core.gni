@@ -8,9 +8,18 @@ _src = get_path_info("../src", "abspath")
 _include = get_path_info("../include", "abspath")
 
 skia_core_sources = [
-  "$_src/c/sk_paint.cpp",
-  "$_src/c/sk_surface.cpp",
   "$_src/c/sk_types_priv.h",
+  "$_src/c/sk_paint.cpp",
+  "$_src/c/sk_path.cpp",
+  "$_src/c/sk_surface.cpp",
+  "$_src/c/sk_canvas.cpp",
+  "$_src/c/sk_imageinfo.cpp",
+  "$_src/c/sk_image.cpp",
+  "$_src/c/sk_picture.cpp",
+  "$_src/c/sk_data.cpp",
+  "$_src/c/sk_effects.cpp",
+  "$_src/c/sk_maskfilter.cpp",
+  "$_src/c/sk_math.cpp",
 
   "$_src/core/Sk4px.h",
   "$_src/core/SkAAClip.cpp",

@@ -19,9 +19,11 @@ class SkData;
 class SkPath;
 class SkRect;
 class SkCanvas;
+class SkImageInfo;
 class SkImage;
 class SkPicture;
 class SkPictureRecorder;
+class SkMatrix;
 
 static inline const SkPaint& AsPaint(const sk_paint_t& cpaint) {
     return reinterpret_cast<const SkPaint&>(cpaint);
@@ -106,5 +108,13 @@ static inline SkPicture* AsPicture(sk_picture_t* cpic) {
 static inline sk_picture_t* ToPicture(SkPicture* pic) {
     return reinterpret_cast<sk_picture_t*>(pic);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// private APIs
+///////////////////////////////////////////////////////////////////////////////////////////
+
+bool from_c_imageinfo(const sk_imageinfo_t& cinfo, SkImageInfo* info);
+
+void from_c_matrix(const sk_matrix_t* cmatrix, SkMatrix* matrix);
 
 #endif
